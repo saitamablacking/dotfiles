@@ -1,0 +1,24 @@
+# binários compilados (os fontes ficam em ~/dwm, ~/st, ~/dmenu, fora deste repo;
+# não listar "dwm"/"st"/"dmenu" aqui, senão as PASTAS de mesmo nome são ignoradas)
+*.o
+*.a
+*.so
+*.out
+stest
+
+# artefatos de build
+config.h.bak
+*.orig
+*.rej
+
+# logs e capturas de depuração
+*.log
+core
+core.*
+*.core
+
+# editores / sistema
+*~
+.*.swp
+.DS_Store
+/.cache/
