@@ -1,5 +1,5 @@
 setxkbmap br abnt2
-export GTK_THEME=Adwaita-dark
+export GTK_THEME="Adwaita:dark"
 
 # audio no maximo a cada entrada no dwm (card pelo nome "PCH", tolera codec demorando)
 for _i in 1 2 3 4 5 6 7 8 9 10; do

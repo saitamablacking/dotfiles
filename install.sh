@@ -64,6 +64,12 @@ for s in dwm-status.sh drun.sh; do
     ln -sfn "$REPO/scripts/$s" "$BIN/$s"
 done
 
+# -------------------------------------------------- 3b. configs GTK (modo escuro)
+info "Instalando configs GTK (tema escuro)"
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
+install -v -m 644 "$REPO/config/gtk-3.0/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+install -v -m 644 "$REPO/config/gtk-4.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
+
 # ------------------------------------------------------- 4. .xinitrc
 if [ -f "$HOME/.xinitrc" ] && ! cmp -s "$REPO/.xinitrc" "$HOME/.xinitrc"; then
     info "Backup do .xinitrc atual em ~/.xinitrc.bak"
