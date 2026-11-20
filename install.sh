@@ -55,11 +55,14 @@ for d in dwm st dmenu; do
     ( cd "$HOME/$d" && sudo make clean install )
 done
 
-# --------------------------------------------- 3. scripts em ~/.local/bin
-info "Instalando scripts em $BIN"
+# ----------------------------------- 3. scripts em ~/.local/bin (symlinks)
+# o repo é a fonte da verdade: editar o script no repo muda o sistema na hora
+info "Linkando scripts em $BIN"
 mkdir -p "$BIN"
-install -v -m 755 "$REPO/scripts/dwm-status.sh" "$BIN/dwm-status.sh"
-install -v -m 755 "$REPO/scripts/drun.sh"       "$BIN/drun.sh"
+for s in dwm-status.sh drun.sh; do
+    chmod +x "$REPO/scripts/$s"
+    ln -sfn "$REPO/scripts/$s" "$BIN/$s"
+done
 
 # ------------------------------------------------------- 4. .xinitrc
 if [ -f "$HOME/.xinitrc" ] && ! cmp -s "$REPO/.xinitrc" "$HOME/.xinitrc"; then
@@ -76,7 +79,7 @@ cat <<'EOF'
 Instalação concluída.
 
   dwm, st e dmenu compilados e instalados
-  scripts em ~/.local/bin/ (dwm-status.sh, drun.sh)
+  scripts linkados em ~/.local/bin/ (dwm-status.sh, drun.sh)
   ~/.xinitrc atualizado
 
 Rode "startx" para aplicar e iniciar a sessão.

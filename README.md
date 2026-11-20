@@ -19,8 +19,8 @@ Wayland**: o driver `radeon` legado funciona bem em X11, e ferramentas como `rad
 | Caminho no repo | Destino | Observação |
 |---|---|---|
 | `dwm/config.h` | `~/dwm/config.h` | customizado (paleta roxa, barra inferior, binds) |
-| `scripts/dwm-status.sh` | `~/.local/bin/dwm-status.sh` | status da barra via `xsetroot` |
-| `scripts/drun.sh` | `~/.local/bin/drun.sh` | launcher `j4-dmenu-desktop` com o visual do dwm |
+| `scripts/dwm-status.sh` | `~/.local/bin/dwm-status.sh` | symlink; status da barra via `xsetroot` |
+| `scripts/drun.sh` | `~/.local/bin/drun.sh` | symlink; launcher `j4-dmenu-desktop` com o visual do dwm |
 | `.xinitrc` | `~/.xinitrc` | teclado, wallpaper, status, `exec dwm` |
 | `install.sh` | — | copia, compila e instala tudo |
 
@@ -47,6 +47,28 @@ correspondentes no repo do dwm primeiro.
 > O `dwm/config.h` também hardcoda o caminho `/home/vinicius/.local/bin/drun.sh`. Se o seu
 > usuário for outro, ajuste `dmenucmd[]` depois de rodar o `install.sh`.
 
+### Transparência da barra (pseudo, sem compositor)
+
+A barra **não é transparente de verdade** — não há canal alpha e nenhum compositor roda.
+O que acontece: o papel de parede do `feh` vive como um *pixmap* na memória do X, registrado
+na propriedade `_XROOTPMAP_ID` (ou `ESETROOT_PMAP_ID`/`_XSETROOT_ID`) da root window. O
+`drw.c` patcheado:
+
+1. lê essa propriedade (`XGetWindowProperty`) e valida o pixmap (geometria e profundidade,
+   sob error handler temporário — pixmap morto degrada, não quebra);
+2. copia **só o recorte** que fica atrás da barra, com `XCopyArea`, para o buffer da barra;
+3. desenha os textos opacos por cima — o esquema "transparente" é um sentinela:
+   `scheme[ColBg].pixel == 0` pula o retângulo de fundo em `drw_text`/`drw_rect`.
+
+Limitações honestas: mostra o **wallpaper**, não janelas atrás; é cópia de pixels, não
+composição (tudo aquilo que o canal alpha do patch oficial faria — e que não funciona sem
+compositor). A troca de wallpaper é detectada em tempo real via `PropertyNotify` na root,
+que invalida o cache e redesenha a barra. Sem wallpaper setado, a barra cai no fundo
+sólido do tema (`col_bg`) sem erro. O patch mora no `dwm.c`/`drw.c` (não versionados,
+motivo na seção acima) junto com: `hide_vacant_tags` (tags vazias somem da barra, com o
+mapeamento de clique corrigido), centralização de janelas flutuantes novas e o fix do
+Xft para texto de tags urgentes sobre fundo transparente.
+
 ## Instalação
 
 Pré-requisito: as dependências de compilação do suckless e do launcher **já instaladas**
@@ -71,7 +93,8 @@ cd ~/dotfiles && ./install.sh
 ```
 
 O `install.sh` copia os `config.h` disponíveis, roda `sudo make clean install` em `~/dwm`,
-`~/st` e `~/dmenu`, instala os scripts em `~/.local/bin/` (com `chmod +x`) e o `.xinitrc`
+`~/st` e `~/dmenu`, cria **symlinks** de `~/.local/bin/` para os scripts do repo (editar o
+script no repo muda o sistema na hora) e instala o `.xinitrc`
 (backup do antigo em `~/.xinitrc.bak`). No fim, basta:
 
 ```bash
