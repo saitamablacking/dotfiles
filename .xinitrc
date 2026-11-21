@@ -14,4 +14,7 @@ amixer -c PCH sset 'Rear Mic Boost' 0 >/dev/null 2>&1
 
 feh --bg-scale ~/Imagens/wall.*
 ~/.local/bin/dwm-status.sh &
-exec dbus-run-session -- dwm
+
+# servidor de som (Pulse) p/ apps que exigem PulseAudio (Sober/Flatpak).
+# ALSA nativo continua no hardware -- pipewire-alsa NAO esta instalado.
+exec dbus-run-session -- sh -c 'pipewire 2>>~/.cache/pipewire.log & pipewire-pulse 2>>~/.cache/pipewire-pulse.log & wireplumber 2>>~/.cache/wireplumber.log & exec dwm'
