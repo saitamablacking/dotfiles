@@ -17,4 +17,15 @@ feh --bg-scale ~/Imagens/wall.*
 
 # servidor de som (Pulse) p/ apps que exigem PulseAudio (Sober/Flatpak).
 # ALSA nativo continua no hardware -- pipewire-alsa NAO esta instalado.
-exec dbus-run-session -- sh -c 'pipewire 2>>~/.cache/pipewire.log & pipewire-pulse 2>>~/.cache/pipewire-pulse.log & wireplumber 2>>~/.cache/wireplumber.log & exec dwm'
+# microfone no slider em 40%: espera o no ALSA existir no PipeWire e aplica.
+exec dbus-run-session -- sh -c '
+    pipewire 2>>~/.cache/pipewire.log &
+    pipewire-pulse 2>>~/.cache/pipewire-pulse.log &
+    wireplumber 2>>~/.cache/wireplumber.log &
+    for _i in $(seq 60); do
+        pactl list short sources 2>/dev/null | grep -q alsa_input && break
+        sleep 0.25
+    done
+    pactl set-source-volume alsa_input.pci-0000_00_1b.0.analog-stereo 40% 2>/dev/null
+    exec dwm
+'
